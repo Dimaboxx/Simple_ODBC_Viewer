@@ -22,6 +22,11 @@ namespace ODBC_Viewer
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        OdbcDataAdapter da;
+        OdbcConnection con;
+        OdbcConnectionStringBuilder connectionStringBuilder;
+        DataTable dt;
         public MainWindow()
         {
             InitializeComponent();
@@ -30,15 +35,19 @@ namespace ODBC_Viewer
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DateTime starttime = DateTime.UtcNow;
-                 var connectionStringBuilder = new OdbcConnectionStringBuilder
-                {
-                    Dsn = tb_DSN.Text,
-                };
+            if (connectionStringBuilder == null)
+                connectionStringBuilder = new OdbcConnectionStringBuilder();
+            connectionStringBuilder.Dsn = tb_DSN.Text;
+            if (con == null)
+                 con = new OdbcConnection();
+            con.ConnectionString = connectionStringBuilder.ConnectionString;
+            if (dt == null)
+                dt = new DataTable();
+            else
+                dt.Clear();
 
-                OdbcConnection con = new OdbcConnection(connectionStringBuilder.ConnectionString);
-                DataTable dt = new DataTable();
-
-                OdbcDataAdapter da = new OdbcDataAdapter();
+            if(da == null)
+                da = new OdbcDataAdapter();
 
                 var sql = tb_query.Text;
 
@@ -54,7 +63,8 @@ namespace ODBC_Viewer
             finally
             {
                 gridAllView.DataContext = dt.DefaultView;
-                tx_result.DataContext = DateTime.UtcNow.Subtract(starttime).ToString(@"hh\:mm\:ss\.fffffff");
+                string ressting = $"Got {dt.Rows.Count} rows in {DateTime.UtcNow.Subtract(starttime).ToString(@"hh\:mm\:ss\.fffffff")}";
+                tx_result.DataContext = ressting;
             }
 
         }
